@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block title %}Feedback{% endblock %}
+{% block content %}<h1>User &amp; clinician feedback</h1>
+<div class="card table-wrap"><table><thead><tr><th>Date</th><th>From</th><th>Prediction</th><th>Rating</th><th>Confirmed outcome</th><th>Used in training</th><th>Comment</th></tr></thead><tbody>
+{% for f in rows %}<tr><td>{{ f.created_at }}</td><td>{{ f.name }} <span class="pill">{{ f.role }}</span></td><td>{{ '#%s'|format(f.prediction_id) if f.prediction_id else '—' }}</td><td>{{ '★'*f.rating if f.rating else '—' }}</td>
+<td>{{ {None:'—',0:'Not diabetic',1:'Diabetic'}[f.actual_outcome] }}</td><td>{{ 'Yes' if f.used_in_training else ('Pending' if f.actual_outcome is not none else '—') }}</td><td style="white-space:normal;min-width:220px">{{ f.comment }}</td></tr>
+{% else %}<tr><td colspan="7" class="muted center">No feedback yet.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

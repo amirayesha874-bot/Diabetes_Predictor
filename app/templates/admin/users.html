@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block title %}Users{% endblock %}
+{% block content %}<h1>User management</h1>
+<form class="card row" method="get"><input name="q" value="{{ q }}" placeholder="Search name or email" style="max-width:280px"><select name="role" style="max-width:200px"><option value="">All roles</option>{% for r in ['patient','professional','admin'] %}<option {{ 'selected' if role==r }}>{{ r }}</option>{% endfor %}</select><button class="btn">Filter</button></form>
+<div class="card table-wrap" style="margin-top:1rem"><table data-sortable><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Predictions</th><th>Professional</th><th>Joined</th><th></th></tr></thead><tbody>
+{% for u in rows %}<tr><td>{{ u.id }}</td><td>{{ u.name }}</td><td>{{ u.email }}</td><td><span class="pill">{{ u.role }}</span></td>
+<td><span class="badge {{ 'low' if u.is_active else 'off' }}">{{ 'Active' if u.is_active else 'Deactivated' }}</span></td><td>{{ u.n_pred }}</td>
+<td>{% if u.role=='patient' %}<form method="post" action="{{ url_for('admin.assign', uid=u.id) }}" class="row" style="flex-wrap:nowrap"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><select name="professional_id" style="min-width:140px;padding:.3rem" onchange="this.form.submit()"><option value="">—</option>{% for p in pros %}<option value="{{ p.id }}" {{ 'selected' if p.id==u.professional_id }}>{{ p.name }}</option>{% endfor %}</select></form>{% else %}—{% endif %}</td>
+<td>{{ u.created_at[:10] }}</td><td class="row" style="flex-wrap:nowrap">
+{% if u.role=='patient' %}<a class="btn secondary sm" href="{{ url_for('pro.patient', pid=u.id) }}">Records</a>{% endif %}
+{% if u.id != current_user.id %}<form method="post" action="{{ url_for('admin.toggle_user', uid=u.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn secondary sm">{{ 'Deactivate' if u.is_active else 'Activate' }}</button></form>
+<form method="post" action="{{ url_for('admin.delete_user', uid=u.id) }}" data-confirm="Delete {{ u.email }} and ALL their data?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn danger sm">Delete</button></form>{% endif %}</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

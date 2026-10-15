@@ -1,0 +1,22 @@
+{% extends 'base.html' %}{% block title %}EDA{% endblock %}
+{% block content %}
+<div class="row between"><div><h1>Exploratory data analysis</h1><p class="muted">{{ ds.filename }} · {{ s.rows }} rows after cleaning (duplicates removed; impossible zeros treated as missing)</p></div>
+<form method="get" class="row"><select name="dataset" onchange="this.form.submit()">{% for d in all_ds %}<option value="{{ d.id }}" {{ 'selected' if d.id==ds.id }}>{{ d.filename }}</option>{% endfor %}</select></form></div>
+<div class="grid g2">
+<div class="card"><h2>Class balance</h2><div class="chart-box" style="height:220px"><canvas id="bal"></canvas></div></div>
+<div class="card"><h2>Mean by outcome</h2><div class="chart-box" style="height:220px"><canvas id="means"></canvas></div></div></div>
+<div class="card table-wrap"><h2>Summary statistics</h2><table><thead><tr><th>Feature</th><th>Mean</th><th>Std</th><th>Min</th><th>25%</th><th>Median</th><th>75%</th><th>Max</th><th>Missing</th></tr></thead><tbody>
+{% for r in s.stats %}<tr><td><b>{{ r.feature }}</b></td><td>{{ r['mean'] }}</td><td>{{ r['std'] }}</td><td>{{ r['min'] }}</td><td>{{ r['25%'] }}</td><td>{{ r['50%'] }}</td><td>{{ r['75%'] }}</td><td>{{ r['max'] }}</td><td>{{ r.missing }}</td></tr>{% endfor %}</tbody></table></div>
+<div class="card"><h2>Correlation heatmap</h2><div class="table-wrap"><div class="heat" id="heat" style="min-width:560px"></div></div></div>
+<h2 style="margin-top:1rem">Feature distributions</h2><div class="grid g3" id="hists"></div>{% endblock %}
+{% block scripts %}<script>
+const S={{ s|tojson }};
+drawBar('bal',['Non-diabetic (0)','Diabetic (1)'],[{data:S.balance,backgroundColor:['#0f766e','#dc2626']}],{options:{plugins:{legend:{display:false}}}});
+drawBar('means',S.class_means.labels,[{label:'Non-diabetic',data:S.class_means.non,backgroundColor:'#0f766e'},{label:'Diabetic',data:S.class_means.dia,backgroundColor:'#dc2626'}],{options:{scales:{y:{type:'logarithmic'}}}});
+const L=S.corr_labels,h=document.getElementById('heat');h.style.gridTemplateColumns='110px repeat('+L.length+',1fr)';
+h.appendChild(document.createElement('div'));L.forEach(l=>{const d=document.createElement('div');d.textContent=l.slice(0,9);d.style.fontWeight=600;h.appendChild(d)});
+S.corr.forEach((row,i)=>{const t=document.createElement('div');t.textContent=L[i];t.style.fontWeight=600;t.style.textAlign='left';h.appendChild(t);
+ row.forEach(v=>{const d=document.createElement('div');d.textContent=v.toFixed(2);const a=Math.abs(v);d.style.background=v>=0?`rgba(15,118,110,${a})`:`rgba(220,38,38,${a})`;d.style.color=a>.5?'#fff':'#0f172a';h.appendChild(d)})});
+const H=document.getElementById('hists');Object.keys(S.hist).forEach((k,i)=>{const c=document.createElement('div');c.className='card';c.innerHTML='<h3>'+k+'</h3><div class="chart-box" style="height:180px"><canvas id="h'+i+'"></canvas></div>';H.appendChild(c);
+ drawBar('h'+i,S.hist[k].labels,[{data:S.hist[k].counts,backgroundColor:'#2563eb'}],{options:{plugins:{legend:{display:false}},scales:{x:{ticks:{maxTicksLimit:5}}}}})});
+</script>{% endblock %}

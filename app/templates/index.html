@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="hero">
+  <h1>Know your diabetes risk early. Act before it matters.</h1>
+  <p>An intelligent, machine-learning screening tool that estimates your risk of diabetes from simple health readings, explains <em>why</em>, and gives personalised lifestyle recommendations.</p>
+  <div class="row" style="margin-top:1rem">
+    {% if current_user %}<a class="btn" href="{{ url_for('main.dashboard') }}">Go to dashboard</a>
+    {% else %}<a class="btn" href="{{ url_for('auth.register') }}">Get started free</a>
+    <a class="btn secondary" href="{{ url_for('auth.login') }}">Log in</a>{% endif %}
+  </div>
+</section>
+<div class="grid g3">
+  <div class="card feature"><div class="ico">🧠</div><h3>4 ML models compared</h3><p class="muted">Neural Network, SVM, Decision Tree and Logistic Regression are trained and the best performer is selected automatically.</p></div>
+  <div class="card feature"><div class="ico">🔍</div><h3>Explainable results</h3><p class="muted">See which factors raised or lowered your risk, with a Low / Moderate / High category and confidence score.</p></div>
+  <div class="card feature"><div class="ico">📈</div><h3>Track over time</h3><p class="muted">Every assessment is saved securely. Watch your risk trend and export PDF/CSV reports.</p></div>
+  <div class="card feature"><div class="ico">👩‍⚕️</div><h3>For clinicians</h3><p class="muted">Healthcare professionals monitor assigned patients, review risk analysis and add notes.</p></div>
+  <div class="card feature"><div class="ico">🔐</div><h3>Secure by design</h3><p class="muted">bcrypt passwords, encrypted health data, role-based access, account lockout and session timeout.</p></div>
+  <div class="card feature"><div class="ico">📚</div><h3>Learn &amp; prevent</h3><p class="muted">Read about risk factors, prevention strategies and healthy-lifestyle guidelines.</p></div>
+</div>
+<div class="disclaimer" style="margin-top:1.5rem">⚠️ This application is a decision-support and educational tool. It does not provide a medical diagnosis and does not replace professional medical judgment.</div>
+{% endblock %}

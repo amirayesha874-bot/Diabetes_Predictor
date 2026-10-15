@@ -1,0 +1,19 @@
+{% extends 'base.html' %}{% block title %}My patients{% endblock %}
+{% block content %}
+<div class="row between"><div><h1>My patients</h1><p class="muted">Clinical decision support – ML-based insights that support, but never replace, your professional judgment.</p></div>
+<a class="btn secondary sm" href="{{ url_for('pro.export_all') }}">⬇ Export all (CSV)</a></div>
+<div class="grid g4" style="margin:1rem 0">
+<div class="card stat"><span class="l">Patients</span><span class="v">{{ summary.total }}</span></div>
+<div class="card stat"><span class="l">High risk</span><span class="v" style="color:var(--high)">{{ summary.high }}</span></div>
+<div class="card stat"><span class="l">Moderate risk</span><span class="v" style="color:var(--mod)">{{ summary.mod }}</span></div>
+<div class="card stat"><span class="l">No assessment yet</span><span class="v">{{ summary.none }}</span></div></div>
+<div class="card"><h2>Add a patient</h2><form method="post" action="{{ url_for('pro.add_patient') }}" class="row">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="email" name="email" placeholder="Patient's registered email" style="max-width:340px" required><button class="btn">Add to my list</button></form>
+<p class="hint">Patients can also choose you from their own profile page.</p></div>
+<div class="card table-wrap"><table data-sortable><thead><tr><th>Patient</th><th>Email</th><th>Assessments</th><th>Latest risk</th><th>Level</th><th>Last assessed</th><th></th></tr></thead><tbody>
+{% for r in rows %}<tr><td><b>{{ r.u.name }}</b></td><td>{{ r.u.email }}</td><td>{{ r.count }}</td>
+<td>{{ r.last.risk_score|pct if r.last else '—' }}</td><td>{% if r.last %}<span class="badge {{ r.last.risk_level|level_class }}">{{ r.last.risk_level }}</span>{% else %}—{% endif %}</td>
+<td>{{ r.last.created_at if r.last else '—' }}</td>
+<td class="row" style="flex-wrap:nowrap"><a class="btn sm" href="{{ url_for('pro.patient', pid=r.u.id) }}">Open</a><a class="btn secondary sm" href="{{ url_for('main.predict', patient_id=r.u.id) }}">New assessment</a>
+<form method="post" action="{{ url_for('pro.remove_patient', pid=r.u.id) }}" data-confirm="Remove this patient from your list?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn secondary sm">Remove</button></form></td></tr>
+{% else %}<tr><td colspan="7" class="muted center" style="padding:2rem">No patients assigned yet.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

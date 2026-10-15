@@ -1,0 +1,27 @@
+{% extends 'base.html' %}{% block title %}Admin overview{% endblock %}
+{% block content %}<h1>Admin overview</h1>
+<div class="grid g4" style="margin:1rem 0">
+<div class="card stat"><span class="l">Patients</span><span class="v">{{ cnt.get('patient',0) }}</span></div>
+<div class="card stat"><span class="l">Healthcare professionals</span><span class="v">{{ cnt.get('professional',0) }}</span></div>
+<div class="card stat"><span class="l">Total predictions</span><span class="v">{{ perf.c }}</span></div>
+<div class="card stat"><span class="l">Avg / max response</span><span class="v">{{ '%.0f'|format(perf.a or 0) }} / {{ '%.0f'|format(perf.m or 0) }} ms</span><span class="muted small">SRS target &lt; 2000 ms</span></div></div>
+<div class="grid g2">
+<div class="card"><div class="row between"><h2>Active model</h2><a href="{{ url_for('admin.models') }}" class="small">Manage →</a></div>
+{% if model %}<p><b>{{ model.algo }}</b> · trained {{ model.trained_at }}</p><div class="grid g4"><div class="stat"><span class="v">{{ '%.1f'|format(model.accuracy*100) }}%</span><span class="l">Accuracy</span></div><div class="stat"><span class="v">{{ '%.1f'|format(model.precision_*100) }}%</span><span class="l">Precision</span></div><div class="stat"><span class="v">{{ '%.1f'|format(model.recall*100) }}%</span><span class="l">Recall</span></div><div class="stat"><span class="v">{{ '%.1f'|format(model.f1*100) }}%</span><span class="l">F1</span></div></div>{% else %}<p class="muted">No active model.</p>{% endif %}
+<div class="chart-box" style="height:240px;margin-top:1rem"><canvas id="mc"></canvas></div></div>
+<div class="card"><h2>Predictions per day (14 days)</h2><div class="chart-box" style="height:200px"><canvas id="daily"></canvas></div>
+<h3 style="margin-top:1rem">Risk-level distribution</h3><div class="chart-box" style="height:160px"><canvas id="lv"></canvas></div></div></div>
+<div class="grid g2" style="margin-top:1rem">
+<div class="card"><h2>System</h2><p>Database size: <b>{{ db_kb }} KB</b><br>Confirmed-outcome feedback awaiting retraining: <b>{{ pending_fb }}</b></p>
+<div class="row"><a class="btn sm" href="{{ url_for('admin.datasets') }}">Upload dataset &amp; retrain</a><a class="btn secondary sm" href="{{ url_for('admin.backups') }}">Backups</a></div></div>
+<div class="card"><div class="row between"><h2>Recent activity</h2><a class="small" href="{{ url_for('admin.logs') }}">All logs →</a></div><table><tbody>
+{% for l in logs %}<tr><td>{{ l.created_at[5:16] }}</td><td>{{ l.action }}</td><td class="muted">{{ l.email or '-' }}</td></tr>{% endfor %}</tbody></table></div></div>{% endblock %}
+{% block scripts %}<script>
+drawBar('mc',{{ models|map(attribute='algo')|list|tojson }},[
+ {label:'Accuracy',data:{{ models|map(attribute='accuracy')|list|tojson }},backgroundColor:'#0f766e'},
+ {label:'Precision',data:{{ models|map(attribute='precision_')|list|tojson }},backgroundColor:'#2563eb'},
+ {label:'Recall',data:{{ models|map(attribute='recall')|list|tojson }},backgroundColor:'#d97706'},
+ {label:'F1',data:{{ models|map(attribute='f1')|list|tojson }},backgroundColor:'#7c3aed'}],{options:{scales:{y:{min:0,max:1}}}});
+drawBar('daily',{{ daily|map(attribute='d')|list|tojson }},[{label:'Predictions',data:{{ daily|map(attribute='c')|list|tojson }},backgroundColor:'#0f766e'}]);
+drawBar('lv',['Low Risk','Moderate Risk','High Risk'],[{data:[{{ levels.get('Low Risk',0) }},{{ levels.get('Moderate Risk',0) }},{{ levels.get('High Risk',0) }}],backgroundColor:['#16a34a','#d97706','#dc2626']}],{type:'doughnut',options:{plugins:{legend:{position:'right'}}}});
+</script>{% endblock %}

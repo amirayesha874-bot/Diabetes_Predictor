@@ -1,0 +1,19 @@
+{% extends 'base.html' %}{% block title %}{{ patient.name }}{% endblock %}
+{% block content %}
+<div class="row between"><div><h1>{{ patient.name }}</h1><p class="muted">{{ patient.email }} · {{ preds|length }} assessment(s)</p></div>
+<div class="row no-print"><a class="btn secondary sm" href="{{ url_for('pro.export_patient', pid=patient.id) }}">⬇ CSV</a><a class="btn secondary sm" href="{{ url_for('pro.patient_pdf', pid=patient.id) }}">⬇ PDF</a>
+{% if current_user.role == 'professional' %}<a class="btn sm" href="{{ url_for('main.predict', patient_id=patient.id) }}">+ New assessment</a><a class="btn secondary sm" href="{{ url_for('pro.home') }}">← Patients</a>{% else %}<a class="btn secondary sm" href="{{ url_for('admin.users') }}">← Users</a>{% endif %}</div></div>
+<div class="card" style="margin-top:1rem"><div class="row between"><h2>Risk trend</h2>
+<div class="tabs"><button data-range="week">Week</button><button data-range="month">Month</button><button data-range="year">Year</button><button data-range="all" class="on">All time</button></div></div>
+<div class="chart-box"><canvas id="trend"></canvas></div><p id="trend-empty" class="muted center" style="display:none;padding:2rem">No data in this period.</p></div>
+{% if preds %}<div class="card hero-card {{ preds[0].risk_level|level_class }}"><h2>Latest analysis</h2>
+<p><span class="badge {{ preds[0].risk_level|level_class }}">{{ preds[0].risk_level }}</span> score <b>{{ preds[0].risk_score|pct }}</b>, confidence {{ preds[0].confidence|pct }}.
+Top factors: {% for e in preds[0].payload.explanation[:3] %}<b>{{ e.label }}</b> ({{ '%+.1f'|format(e.impact) }} pts){{ ', ' if not loop.last }}{% endfor %}.</p></div>{% endif %}
+<div class="card table-wrap"><h2>Prediction history</h2><table data-sortable><thead><tr><th>Date</th><th>Age</th><th>BMI</th><th>Glucose</th><th>BP</th><th>Risk</th><th>Level</th><th>Notes</th><th></th></tr></thead><tbody>
+{% for p in preds %}{% set i = p.payload.inputs %}<tr><td>{{ p.created_at }}</td><td>{{ i.Age|int }}</td><td>{{ i.BMI }}</td><td>{{ i.Glucose }}</td><td>{{ i.Systolic|int }}/{{ i.BloodPressure|int }}</td><td>{{ p.risk_score|pct }}</td>
+<td><span class="badge {{ p.risk_level|level_class }}">{{ p.risk_level }}</span></td><td>{{ notes.get(p.id, 0) }}</td>
+<td class="row" style="flex-wrap:nowrap"><a class="btn sm" href="{{ url_for('main.result', pid=p.id) }}">Analysis / notes</a>
+{% if current_user.role == 'admin' %}<form method="post" action="{{ url_for('main.delete_prediction', pid=p.id) }}" data-confirm="Delete this record?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="next" value="{{ url_for('pro.patient', pid=patient.id) }}"><button class="btn danger sm">Delete</button></form>{% endif %}</td></tr>
+{% else %}<tr><td colspan="9" class="muted center" style="padding:2rem">No assessments recorded.</td></tr>{% endfor %}</tbody></table></div>
+<div class="disclaimer">Clinical decision support: ML insights shown here assist, and do not replace, professional clinical judgment.</div>{% endblock %}
+{% block scripts %}<script>drawTrend('trend','{{ url_for("main.api_trend", user_id=patient.id) }}','trend-empty');</script>{% endblock %}

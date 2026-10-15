@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block title %}Activity logs{% endblock %}
+{% block content %}<h1>System activity logs</h1>
+<form class="card row" method="get"><select name="action" style="max-width:260px"><option value="">All actions</option>{% for a in actions %}<option {{ 'selected' if a==action }}>{{ a }}</option>{% endfor %}</select><button class="btn">Filter</button></form>
+<div class="card table-wrap" style="margin-top:1rem"><table><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Detail</th><th>IP</th></tr></thead><tbody>
+{% for l in rows %}<tr><td>{{ l.created_at }}</td><td>{{ l.email or '-' }}</td><td>{{ l.action }}</td><td class="muted">{{ l.detail }}</td><td>{{ l.ip }}</td></tr>{% else %}<tr><td colspan="5" class="center muted">No entries.</td></tr>{% endfor %}</tbody></table></div>
+<div class="row" style="margin-top:.8rem">{% if page>1 %}<a class="btn secondary sm" href="{{ url_for('admin.logs', action=action, page=page-1) }}">← Newer</a>{% endif %}{% if rows|length==100 %}<a class="btn secondary sm" href="{{ url_for('admin.logs', action=action, page=page+1) }}">Older →</a>{% endif %}</div>{% endblock %}

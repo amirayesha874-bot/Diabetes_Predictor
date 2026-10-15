@@ -1,0 +1,41 @@
+{% extends 'base.html' %}{% block title %}New assessment{% endblock %}
+{% macro fld(name, label, tip, type='number', ph='', step='any', req=True) %}
+<div class="field {{ 'err' if errors.get(name) }}"><label for="{{ name }}">{{ label }}{% if tip %}<span class="tip" tabindex="0" data-tip="{{ tip }}">?</span>{% endif %}</label>
+<input id="{{ name }}" name="{{ name }}" type="{{ type }}" step="{{ step }}" placeholder="{{ ph }}" value="{{ form.get(name,'') if form.get(name) is not none else '' }}" {{ 'required' if req }}>
+{% if errors.get(name) %}<div class="err-msg">{{ errors[name] }}</div>{% endif %}</div>
+{% endmacro %}
+{% macro sel(name, label, opts, tip='') %}
+<div class="field {{ 'err' if errors.get(name) }}"><label for="{{ name }}">{{ label }}{% if tip %}<span class="tip" tabindex="0" data-tip="{{ tip }}">?</span>{% endif %}</label>
+<select id="{{ name }}" name="{{ name }}" required><option value="">Select…</option>{% for o in opts %}<option {{ 'selected' if form.get(name)==o }}>{{ o }}</option>{% endfor %}</select>
+{% if errors.get(name) %}<div class="err-msg">{{ errors[name] }}</div>{% endif %}</div>
+{% endmacro %}
+{% block content %}
+<h1>Diabetes risk assessment</h1>
+<p class="muted">{% if target.id != current_user.id %}Entering data for patient <b>{{ target.name }}</b>. {% endif %}Fill in your latest readings. Fields marked with <span class="tip" style="cursor:default">?</span> have help text. Optional lab values improve accuracy.</p>
+<form method="post" novalidate class="card">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% if target.id != current_user.id %}<input type="hidden" name="patient_id" value="{{ target.id }}">{% endif %}
+<fieldset><legend>Basic information</legend><div class="grid g3">
+{{ fld('age','Age (years)','Your age in years (18–120).',ph='e.g. 45') }}
+{{ sel('gender','Gender',['Female','Male','Other']) }}
+<div id="pregnancies_wrap">{{ fld('pregnancies','Number of pregnancies','Times pregnant (leave empty if none / not applicable).',ph='e.g. 2',req=False) }}</div>
+{{ fld('height','Height (cm)','Standing height in centimetres (100–250).',ph='e.g. 170') }}
+{{ fld('weight','Weight (kg)','Body weight in kilograms (25–350).',ph='e.g. 78') }}
+<div class="field"><label>BMI (auto-calculated)<span class="tip" tabindex="0" data-tip="Body-Mass Index = weight(kg) ÷ height(m)². 18.5–24.9 is healthy.">?</span></label><div class="card" style="padding:.6rem .75rem;background:#f8fafc" id="bmi_out">—</div></div>
+</div></fieldset>
+<fieldset><legend>Clinical readings</legend><div class="grid g3">
+{{ fld('glucose','Fasting glucose (mg/dL)','Blood sugar after ≥8 hours of fasting. Normal <100, pre-diabetes 100–125, diabetes ≥126.',ph='e.g. 105') }}
+{{ fld('systolic','Systolic BP (mmHg)','The upper blood-pressure number. Normal is below 120.',ph='e.g. 120') }}
+{{ fld('diastolic','Diastolic BP (mmHg)','The lower blood-pressure number. Normal is below 80.',ph='e.g. 80') }}
+{{ fld('skin','Skin-fold thickness (mm) – optional','Triceps skin-fold measurement. Leave blank if unknown.',ph='optional',req=False) }}
+{{ fld('insulin','2-h serum insulin (µU/ml) – optional','Lab value from a glucose-tolerance test. Leave blank if unknown.',ph='optional',req=False) }}
+</div></fieldset>
+<fieldset><legend>Family &amp; lifestyle</legend><div class="grid g3">
+{{ sel('family_history','Family history of diabetes',['Yes','No'],'Parent, brother or sister with diabetes.') }}
+{{ sel('smoking','Smoking status',['Never','Former','Current']) }}
+{{ fld('activity','Physical activity (hours / week)','Total hours of moderate exercise per week. 2.5 h is the recommended minimum.',ph='e.g. 3') }}
+{{ sel('diet','Diet quality',['Poor','Average','Good'],'Poor: lots of sugary/processed food. Good: mostly vegetables, whole grains, lean protein.') }}
+</div></fieldset>
+<div class="row"><button class="btn">Predict my risk</button><a class="btn secondary" href="{{ url_for('main.dashboard') }}">Cancel</a></div>
+</form>
+{% endblock %}

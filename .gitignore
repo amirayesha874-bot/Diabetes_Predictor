@@ -1,0 +1,28 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+
+# Virtual environments
+venv/
+.venv/
+
+# Secrets
+.env
+instance/*.key
+
+# Local databases and backups
+instance/*.db
+backups/*
+!backups/.gitkeep
+
+# Uploaded files
+uploads/*
+!uploads/.gitkeep
+
+# Generated machine-learning models
+models/*.joblib
+
+# IDE
+.vscode/

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% block title %}Datasets & training{% endblock %}
+{% block content %}<h1>Datasets &amp; model training</h1>
+<div class="card"><h2>Upload a CSV dataset</h2>
+<p class="muted">Required columns: <code>preg, plas, pres, skin, test, mass, pedi, age, class</code> (Kaggle Pima format) or <code>Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age, Outcome</code>. Target must be 0/1.</p>
+<form method="post" enctype="multipart/form-data" class="row"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="file" name="file" accept=".csv" required style="max-width:360px"><button class="btn">Upload &amp; validate</button></form></div>
+<div class="card table-wrap"><h2>Available datasets</h2>{% if pending_fb %}<p class="small" style="color:var(--mod)">⚡ {{ pending_fb }} confirmed-outcome feedback record(s) can be added when training.</p>{% endif %}
+<table><thead><tr><th>ID</th><th>File</th><th>Rows</th><th>Uploaded</th><th>By</th><th></th></tr></thead><tbody>
+{% for d in rows %}<tr><td>{{ d.id }}</td><td>{{ d.filename }}</td><td>{{ d.n_rows }}</td><td>{{ d.uploaded_at }}</td><td>{{ d.uname or 'system' }}</td>
+<td class="row" style="flex-wrap:nowrap"><a class="btn secondary sm" href="{{ url_for('admin.eda', dataset=d.id) }}">EDA</a>
+<form method="post" action="{{ url_for('admin.train', did=d.id) }}" class="row" style="flex-wrap:nowrap"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label class="check small" style="margin:0"><input type="checkbox" name="feedback" value="1" checked> + feedback</label><button class="btn sm" onclick="this.textContent='Training…'">Train &amp; deploy</button></form>
+<form method="post" action="{{ url_for('admin.delete_dataset', did=d.id) }}" data-confirm="Remove this dataset?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn danger sm">Remove</button></form></td></tr>{% endfor %}</tbody></table>
+<p class="hint">Training splits the data 70% / 30%, trains Neural Network, SVM, Decision Tree and Logistic Regression, then deploys the best model without downtime.</p></div>{% endblock %}

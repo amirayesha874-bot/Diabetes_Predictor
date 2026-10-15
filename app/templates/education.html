@@ -1,0 +1,39 @@
+{% extends 'base.html' %}{% block title %}Learn - Diabetes{% endblock %}
+{% block content %}
+<h1>Understanding diabetes</h1>
+<p class="muted">Educational resources on risk factors, prevention and healthy living.</p>
+<div class="grid g2">
+<div class="card"><h2>🔎 Key risk factors</h2><ul>
+<li><b>Overweight / obesity</b> – especially fat around the waist.</li>
+<li><b>Family history</b> – a parent or sibling with type 2 diabetes.</li>
+<li><b>Age</b> – risk increases after 45.</li>
+<li><b>High blood pressure</b> (≥ 130/80 mmHg) and abnormal cholesterol.</li>
+<li><b>Physical inactivity</b> and <b>smoking</b>.</li>
+<li><b>Pre-diabetes</b> – fasting glucose 100–125 mg/dL.</li>
+<li><b>Gestational diabetes</b> or multiple pregnancies.</li></ul></div>
+<div class="card"><h2>🛡️ Prevention strategies</h2><ul>
+<li>Lose 5–7% of body weight if overweight – cuts risk by up to ~58% in trials.</li>
+<li>Exercise 150 minutes per week (e.g. brisk walking).</li>
+<li>Choose whole grains, vegetables, legumes, lean protein; limit sugary drinks.</li>
+<li>Don't smoke; limit alcohol.</li>
+<li>Get screened regularly if you have risk factors.</li></ul></div>
+<div class="card"><h2>🥗 Healthy-lifestyle guidelines</h2><ul>
+<li>Fill half your plate with non-starchy vegetables.</li>
+<li>Prefer water, unsweetened tea; avoid fizzy/sweetened drinks.</li>
+<li>Sleep 7–8 hours; chronic sleep loss worsens insulin resistance.</li>
+<li>Manage stress – walking, prayer/meditation, hobbies.</li>
+<li>Reduce salt to help control blood pressure.</li></ul></div>
+<div class="card"><h2>📖 Understanding your readings</h2>
+<table><tr><th>Fasting glucose</th><th>Meaning</th></tr>
+<tr><td>&lt; 100 mg/dL</td><td>Normal</td></tr><tr><td>100 – 125</td><td>Pre-diabetes</td></tr><tr><td>≥ 126 (twice)</td><td>Diabetes range</td></tr></table>
+<table style="margin-top:.8rem"><tr><th>BMI</th><th>Category</th></tr>
+<tr><td>&lt; 18.5</td><td>Underweight</td></tr><tr><td>18.5 – 24.9</td><td>Healthy</td></tr><tr><td>25 – 29.9</td><td>Overweight</td></tr><tr><td>≥ 30</td><td>Obese</td></tr></table></div>
+<div class="card"><h2>🚨 Warning signs – see a doctor</h2><ul>
+<li>Increased thirst and frequent urination</li><li>Unexplained weight loss, constant hunger</li>
+<li>Blurred vision, slow-healing wounds</li><li>Tingling in hands or feet, extreme fatigue</li></ul></div>
+<div class="card"><h2>ℹ️ About the risk categories</h2>
+<p><span class="badge low">Low &lt; 35%</span> <span class="badge mod">Moderate 35–65%</span> <span class="badge high">High ≥ 65%</span></p>
+<p class="muted small">Categories are derived from the model's predicted probability of diabetes. They indicate screening priority, not a diagnosis.</p></div>
+</div>
+<div class="disclaimer" style="margin-top:1rem">This content is educational only. Always consult a qualified healthcare professional.</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}{% block title %}Result{% endblock %}
+{% block content %}
+{% set lv = p.risk_level|level_class %}
+<div class="row between no-print"><div><h1>Assessment result</h1><p class="muted">{{ owner.name }} · {{ p.created_at }} · Model: {{ p.model_name }}</p></div>
+<div class="row"><a class="btn secondary sm" href="{{ url_for('main.result_pdf', pid=p.id) }}">⬇ PDF</a>
+{% if current_user.role == 'patient' %}<a class="btn secondary sm" href="{{ url_for('main.feedback', prediction_id=p.id) }}">Give feedback</a><a class="btn sm" href="{{ url_for('main.predict') }}">New assessment</a>
+{% elif is_pro and current_user.role == 'professional' %}<a class="btn secondary sm" href="{{ url_for('pro.patient', pid=owner.id) }}">← Patient</a>{% elif current_user.role == 'admin' %}<a class="btn secondary sm" href="{{ url_for('pro.patient', pid=owner.id) }}">← Patient</a>{% endif %}</div></div>
+
+<div class="grid g-main" style="margin-top:1rem">
+<div>
+  <div class="card hero-card {{ lv }}">
+    <div class="row between"><div><div class="muted small">Estimated diabetes risk</div><div class="score">{{ p.risk_score|pct }}</div></div>
+    <div style="text-align:right"><span class="badge {{ lv }}" style="font-size:1rem">{{ p.risk_level }}</span><div class="muted small" style="margin-top:.4rem">Confidence {{ p.confidence|pct }}</div></div></div>
+    <div class="gauge"><span class="needle" style="left:{{ [p.risk_score,100]|min }}%"></span></div>
+    <div class="row between muted small"><span>Low &lt;35%</span><span>Moderate 35–65%</span><span>High ≥65%</span></div>
+    <p style="margin-top:.8rem">Model prediction: <b>{{ 'Likely diabetic profile' if p.prediction else 'Likely non-diabetic profile' }}</b>.</p>
+  </div>
+
+  <div class="card"><h2>Why this result? (risk-factor analysis)</h2>
+    <p class="muted small">Each bar shows how much that factor moved your risk compared with a typical value in the training data. Red = increases risk, green = decreases.</p>
+    {% for e in p.payload.explanation %}
+      {% set w = [e.impact|abs * 2, 50]|min %}
+      <div class="bar-row"><span>{{ e.label }}<br><span class="muted small">{{ e.value }} (typical {{ e.typical }})</span></span>
+        <div class="bar"><i class="{{ 'up' if e.impact>0 else 'down' }}" style="{{ 'left:50%' if e.impact>0 else 'right:50%' }};width:{{ w }}%"></i><i class="neu" style="left:50%;width:1px;background:#94a3b8"></i></div>
+        <b style="color:{{ 'var(--high)' if e.impact>0 else 'var(--low)' }}">{{ '%+.1f'|format(e.impact) }} pts</b></div>
+    {% endfor %}
+    {% if p.payload.inputs.Gender != 'Female' %}<p class="muted small">Note: the training dataset (Pima Indian women) contains only female patients, so results for other groups should be interpreted with extra caution.</p>{% endif %}
+    {% if p.payload.inputs._dpf_estimated %}<p class="muted small">The family-history index was estimated from your Yes/No answer.</p>{% endif %}
+    {% if p.payload.model_importance %}<details style="margin-top:.6rem"><summary class="small">Overall most influential factors in the model</summary>
+      {% for k,v in p.payload.model_importance.items()|sort(attribute=1, reverse=True) %}{% if loop.index <= 4 %}<div class="small">• {{ k }} ({{ '%.3f'|format(v) }})</div>{% endif %}{% endfor %}</details>{% endif %}
+  </div>
+
+  <div class="card"><h2>Personalised recommendations</h2>
+    {% for r in p.payload.recommendations %}<div class="rec"><span class="dot {{ r.priority }}"></span><div><b>{{ r.category }}</b><br>{{ r.text }}</div></div>{% endfor %}
+  </div>
+</div>
+
+<div>
+  <div class="card"><h2>Submitted data</h2><table>
+    {% set i = p.payload.inputs %}
+    <tr><td>Age</td><td>{{ i.Age|int }}</td></tr><tr><td>Gender</td><td>{{ i.Gender }}</td></tr>
+    <tr><td>Height / Weight</td><td>{{ i.Height }} cm / {{ i.Weight }} kg</td></tr><tr><td>BMI</td><td>{{ i.BMI }}</td></tr>
+    <tr><td>Fasting glucose</td><td>{{ i.Glucose }} mg/dL</td></tr><tr><td>Blood pressure</td><td>{{ i.Systolic|int }}/{{ i.BloodPressure|int }}</td></tr>
+    <tr><td>Family history</td><td>{{ i.FamilyHistory }}</td></tr><tr><td>Smoking</td><td>{{ i.Smoking }}</td></tr>
+    <tr><td>Activity</td><td>{{ i.Activity }} h/week</td></tr><tr><td>Diet</td><td>{{ i.Diet }}</td></tr></table></div>
+  <div class="card"><h2>Clinician notes</h2>
+    {% for n in notes %}<div class="rec"><div><b>{{ n.name }}</b> <span class="muted small">{{ n.created_at }}</span><br>{{ n.text }}</div></div>
+    {% else %}<p class="muted small">No notes yet.</p>{% endfor %}
+    {% if current_user.role == 'professional' %}
+    <form method="post" action="{{ url_for('pro.add_note') }}" style="margin-top:.6rem"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="prediction_id" value="{{ p.id }}">
+      <textarea name="note" rows="3" maxlength="2000" placeholder="Add a clinical note for this prediction…" required></textarea><button class="btn sm" style="margin-top:.5rem">Add note</button></form>{% endif %}</div>
+  <div class="disclaimer">⚠️ This is a machine-learning screening aid. It supports but does not replace professional medical judgment. Please confirm any concern with a clinician.</div>
+</div></div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}{% block title %}Register{% endblock %}
+{% block content %}<div class="card auth-box"><h1>Create account</h1><p class="muted">Join as a patient or a healthcare professional.</p>
+<form method="post" novalidate>
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="field"><label for="name">Full name</label><input id="name" name="name" placeholder="e.g. Ayesha Khan" value="{{ form.get('name','') }}" required></div>
+<div class="field"><label for="email">Email</label><input id="email" name="email" type="email" placeholder="you@example.com" value="{{ form.get('email','') }}" required></div>
+<div class="field"><label for="role">I am a</label><select id="role" name="role">
+<option value="patient" {{ 'selected' if form.get('role')!='professional' }}>Patient</option>
+<option value="professional" {{ 'selected' if form.get('role')=='professional' }}>Healthcare professional</option></select></div>
+<div class="field"><label for="password">Password</label><input id="password" name="password" type="password" placeholder="At least 8 characters, letters + digits" required><div class="hint">Minimum 8 characters with letters and numbers.</div></div>
+<div class="field"><label for="confirm">Confirm password</label><input id="confirm" name="confirm" type="password" placeholder="Repeat password" required></div>
+<div class="field"><label class="check"><input type="checkbox" name="reminders" value="1"> Send me a monthly reassessment reminder</label></div>
+<button class="btn block">Register</button></form>
+<p class="small center" style="margin-top:1rem">Already registered? <a href="{{ url_for('auth.login') }}">Log in</a> · By registering you accept the <a href="{{ url_for('main.privacy') }}">privacy policy</a>.</p></div>{% endblock %}

@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block title %}Outbox{% endblock %}
+{% block content %}<div class="row between"><div><h1>Email outbox</h1><p class="muted">All notification emails (registration confirmations, password resets, reminders). Configure SMTP in <code>.env</code> to deliver them.</p></div>
+<form method="post" action="{{ url_for('admin.reminders') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn">Send monthly reminders now</button></form></div>
+<div class="card table-wrap"><table><thead><tr><th>Date</th><th>To</th><th>Subject</th><th>Delivered via SMTP</th><th>Body</th></tr></thead><tbody>
+{% for m in rows %}<tr><td>{{ m.created_at }}</td><td>{{ m.to_email }}</td><td>{{ m.subject }}</td><td>{{ 'Yes' if m.sent else 'No (logged only)' }}</td><td style="white-space:pre-wrap;min-width:260px;max-width:420px"><details><summary>View</summary>{{ m.body }}</details></td></tr>{% else %}<tr><td colspan="5" class="muted center">Empty.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

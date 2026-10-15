@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block title %}Choose new password{% endblock %}
+{% block content %}<div class="card auth-box"><h1>Choose a new password</h1>
+<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="field"><label for="password">New password</label><input id="password" name="password" type="password" required></div>
+<div class="field"><label for="confirm">Confirm password</label><input id="confirm" name="confirm" type="password" required></div>
+<button class="btn block">Update password</button></form></div>{% endblock %}

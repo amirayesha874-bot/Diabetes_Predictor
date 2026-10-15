@@ -1,0 +1,6 @@
+{% extends 'base.html' %}{% block title %}Backups{% endblock %}
+{% block content %}<h1>Database backups</h1><p class="muted">An automatic backup is created daily (last 14 kept). You can also back up or restore manually.</p>
+<div class="card"><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="create"><button class="btn">Create backup now</button></form></div>
+<div class="card table-wrap"><table><thead><tr><th>File</th><th>Created</th><th>Size</th><th></th></tr></thead><tbody>
+{% for f in files %}<tr><td>{{ f.name }}</td><td>{{ f.time }}</td><td>{{ f.size_kb }} KB</td><td><form method="post" data-confirm="Restore the database from this backup? Current data will be replaced (a safety backup is made first)."><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="restore"><input type="hidden" name="name" value="{{ f.name }}"><button class="btn secondary sm">Restore</button></form></td></tr>
+{% else %}<tr><td colspan="4" class="muted center">No backups yet.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

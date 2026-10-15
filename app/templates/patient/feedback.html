@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block title %}Feedback{% endblock %}
+{% block content %}<h1>Feedback &amp; model improvement</h1>
+<p class="muted">Tell us how the system performed. If you know the confirmed clinical outcome for a prediction, share it – confirmed outcomes help administrators retrain and improve the model.</p>
+<div class="grid g2"><div class="card"><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{% if recent %}<div class="field"><label for="prediction_id">Related prediction (optional)</label><select id="prediction_id" name="prediction_id"><option value="">General feedback</option>
+{% for r in recent %}<option value="{{ r.id }}" {{ 'selected' if selected==r.id }}>#{{ r.id }} · {{ r.created_at }} · {{ r.risk_level }}</option>{% endfor %}</select></div>
+<div class="field"><label for="actual_outcome">Confirmed clinical outcome (optional)</label><select id="actual_outcome" name="actual_outcome"><option value="">Not known</option><option value="1">Diagnosed with diabetes</option><option value="0">Not diabetic</option></select><div class="hint">Only select if confirmed by a laboratory test or clinician.</div></div>{% endif %}
+<div class="field"><label for="rating">Rating</label><select id="rating" name="rating"><option value="">—</option>{% for n in [5,4,3,2,1] %}<option value="{{ n }}">{{ '★'*n }}</option>{% endfor %}</select></div>
+<div class="field"><label for="comment">Comments</label><textarea id="comment" name="comment" rows="5" maxlength="2000" placeholder="Was the result clear? Were the recommendations useful?"></textarea></div>
+<button class="btn">Submit feedback</button></form></div>
+<div class="card"><h2>My recent feedback</h2>{% for f in mine %}<div class="rec"><div><span class="muted small">{{ f.created_at }}</span> {% if f.rating %}<b>{{ '★'*f.rating }}</b>{% endif %}<br>{{ f.comment or '—' }}</div></div>{% else %}<p class="muted">Nothing submitted yet.</p>{% endfor %}</div></div>{% endblock %}

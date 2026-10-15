@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% block title %}Privacy policy{% endblock %}
+{% block content %}<div class="card" style="max-width:820px;margin:auto">
+<h1>Privacy policy</h1>
+<h3>What we collect</h3><p>Your name, email, role, and the health readings you enter (age, height, weight, glucose, blood pressure, lifestyle answers) together with the resulting predictions.</p>
+<h3>How it is used</h3><p>Only to generate your risk prediction, recommendations, history and reports, and to let your assigned healthcare professional review your results. If you submit a confirmed outcome as feedback, those readings may be used to retrain the model.</p>
+<h3>How it is protected</h3><p>Passwords are hashed with bcrypt. Health inputs, recommendations and clinician notes are encrypted at rest. Sessions expire after 15 minutes of inactivity and accounts are locked for 10 minutes after 5 failed logins. Use HTTPS when deploying on a server.</p>
+<h3>Sharing</h3><p>We never sell or share your data with third parties. Only you, your assigned healthcare professional and system administrators (for support) can access your records.</p>
+<h3>Your rights</h3><p>You can edit your profile, delete individual predictions, export your data (PDF/CSV) and permanently delete your account and all associated data from <b>Profile → Delete account</b> (right to erasure).</p>
+<h3>Medical disclaimer</h3><p>This system supports clinical decision-making and does not replace professional medical judgment.</p></div>{% endblock %}

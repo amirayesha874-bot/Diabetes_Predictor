@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% block title %}History{% endblock %}
+{% macro sortlink(key,label) %}<a href="{{ url_for('main.history', sort=key, dir=('asc' if sort==key and direction=='desc' else 'desc')) }}">{{ label }}{% if sort==key %} {{ '▼' if direction=='desc' else '▲' }}{% endif %}</a>{% endmacro %}
+{% block content %}
+<div class="row between"><h1>Prediction history</h1>
+<div class="row no-print"><a class="btn secondary sm" href="{{ url_for('main.export_history', fmt='csv') }}">⬇ CSV</a><a class="btn secondary sm" href="{{ url_for('main.export_history', fmt='pdf') }}">⬇ PDF</a><a class="btn sm" href="{{ url_for('main.predict') }}">+ New</a></div></div>
+<div class="card table-wrap">
+{% if preds %}<table><thead><tr><th>{{ sortlink('date','Date') }}</th><th>Age</th><th>BMI</th><th>Glucose</th><th>BP</th><th>{{ sortlink('risk','Risk score') }}</th><th>Level</th><th>Conf.</th><th></th></tr></thead><tbody>
+{% for p in preds %}{% set i = p.payload.inputs %}<tr><td>{{ p.created_at }}</td><td>{{ i.Age|int }}</td><td>{{ i.BMI }}</td><td>{{ i.Glucose }}</td><td>{{ i.Systolic|int }}/{{ i.BloodPressure|int }}</td><td>{{ p.risk_score|pct }}</td>
+<td><span class="badge {{ p.risk_level|level_class }}">{{ p.risk_level }}</span></td><td>{{ p.confidence|pct }}</td>
+<td class="row" style="flex-wrap:nowrap"><a class="btn secondary sm" href="{{ url_for('main.result', pid=p.id) }}">View</a>
+<form method="post" action="{{ url_for('main.delete_prediction', pid=p.id) }}" data-confirm="Delete this prediction record?"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn danger sm">Delete</button></form></td></tr>{% endfor %}
+</tbody></table>{% else %}<p class="muted center" style="padding:2rem">No records yet. <a href="{{ url_for('main.predict') }}">Take an assessment</a>.</p>{% endif %}</div>
+{% endblock %}

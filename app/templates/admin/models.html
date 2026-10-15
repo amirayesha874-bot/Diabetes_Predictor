@@ -1,0 +1,23 @@
+{% extends 'base.html' %}{% block title %}Models{% endblock %}
+{% block content %}
+<div class="row between"><div><h1>Model comparison &amp; management</h1><p class="muted">Run #{{ run.id }} · {{ run.trained_at }} · dataset: {{ run.filename }} · train {{ run.n_train }} / test {{ run.n_test }} (70/30){% if run.n_feedback %} · +{{ run.n_feedback }} feedback rows{% endif %}</p></div>
+<div class="row"><form method="get"><select name="run" onchange="this.form.submit()">{% for r in runs %}<option value="{{ r.id }}" {{ 'selected' if r.id==run.id }}>Run #{{ r.id }} – {{ r.trained_at }}</option>{% endfor %}</select></form>
+<a class="btn secondary sm" href="{{ url_for('admin.model_report', rid=run.id) }}">⬇ PDF report</a></div></div>
+<div class="card table-wrap"><table><thead><tr><th>Algorithm</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-score</th><th>Status</th><th></th></tr></thead><tbody>
+{% for m in ms %}<tr><td><b>{{ m.algo }}</b> {% if m.is_best %}<span class="badge low">🏆 Best</span>{% endif %}</td><td>{{ '%.2f'|format(m.accuracy*100) }}%</td><td>{{ '%.2f'|format(m.precision_*100) }}%</td><td>{{ '%.2f'|format(m.recall*100) }}%</td><td>{{ '%.2f'|format(m.f1*100) }}%</td>
+<td>{% if m.is_active %}<span class="badge low">Deployed</span>{% else %}<span class="badge off">Not deployed</span>{% endif %}</td>
+<td>{% if not m.is_active %}<form method="post" action="{{ url_for('admin.deploy', mid=m.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn sm">Deploy</button></form>{% endif %}</td></tr>{% endfor %}</tbody></table>
+<p class="hint">Best model = highest accuracy (ties broken by F1, then recall). Deploying swaps the model file atomically – no downtime.</p></div>
+<div class="grid g2"><div class="card"><h2>Metric comparison</h2><div class="chart-box"><canvas id="cmp"></canvas></div></div>
+<div class="card"><h2>Feature importance (best model)</h2><div class="chart-box"><canvas id="imp"></canvas></div><p class="hint">Permutation importance: drop in test accuracy when a feature is shuffled.</p></div></div>
+<h2 style="margin-top:1rem">Confusion matrices (test set)</h2><div class="grid g4">
+{% for name, cm in cms.items() %}<div class="card"><h3>{{ name }}</h3><div class="cm"><div></div><div class="h">Pred 0</div><div class="h">Pred 1</div>
+<div class="h">Actual 0</div><div class="ok">{{ cm[0][0] }}<br><span class="small">TN</span></div><div class="bad">{{ cm[0][1] }}<br><span class="small">FP</span></div>
+<div class="h">Actual 1</div><div class="bad">{{ cm[1][0] }}<br><span class="small">FN</span></div><div class="ok">{{ cm[1][1] }}<br><span class="small">TP</span></div></div></div>{% endfor %}</div>{% endblock %}
+{% block scripts %}<script>
+drawBar('cmp',{{ ms|map(attribute='algo')|list|tojson }},[
+ {label:'Accuracy',data:{{ ms|map(attribute='accuracy')|list|tojson }},backgroundColor:'#0f766e'},{label:'Precision',data:{{ ms|map(attribute='precision_')|list|tojson }},backgroundColor:'#2563eb'},
+ {label:'Recall',data:{{ ms|map(attribute='recall')|list|tojson }},backgroundColor:'#d97706'},{label:'F1',data:{{ ms|map(attribute='f1')|list|tojson }},backgroundColor:'#7c3aed'}],{options:{scales:{y:{min:0,max:1}}}});
+{% set items = imp.items()|sort(attribute=1, reverse=True) %}
+drawBar('imp',{{ items|map(attribute=0)|list|tojson }},[{data:{{ items|map(attribute=1)|list|tojson }},backgroundColor:'#0f766e'}],{options:{indexAxis:'y',plugins:{legend:{display:false}}}});
+</script>{% endblock %}

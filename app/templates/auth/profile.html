@@ -1,0 +1,25 @@
+{% extends 'base.html' %}{% block title %}Profile{% endblock %}
+{% block content %}<h1>My profile</h1>
+<div class="grid g2">
+<div class="card"><h2>Personal information</h2>
+<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="info">
+<div class="field"><label>Email</label><input value="{{ current_user.email }}" disabled></div>
+<div class="field"><label for="name">Full name</label><input id="name" name="name" value="{{ current_user.name }}" required></div>
+{% if current_user.role == 'patient' %}
+<div class="field"><label for="professional_id">My healthcare professional</label><select id="professional_id" name="professional_id">
+<option value="">— None —</option>{% for p in pros %}<option value="{{ p.id }}" {{ 'selected' if p.id==current_user.professional_id }}>{{ p.name }}</option>{% endfor %}</select>
+<div class="hint">They can view your history and trends and add notes.</div></div>
+<div class="field"><label class="check"><input type="checkbox" name="reminders" value="1" {{ 'checked' if current_user.reminder_opt_in }}> Monthly reassessment reminder by email</label></div>
+{% endif %}
+<button class="btn">Save changes</button></form></div>
+<div class="card"><h2>Change password</h2>
+<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="action" value="password">
+<div class="field"><label for="current">Current password</label><input id="current" name="current" type="password" required></div>
+<div class="field"><label for="password">New password</label><input id="password" name="password" type="password" required></div>
+<div class="field"><label for="confirm">Confirm new password</label><input id="confirm" name="confirm" type="password" required></div>
+<button class="btn">Update password</button></form></div></div>
+<div class="card" style="border-color:#fecaca"><h2>Delete account</h2>
+<p class="muted">Permanently erase your account and <b>all</b> associated data (predictions, notes, feedback). This cannot be undone.</p>
+<form method="post" action="{{ url_for('auth.delete_account') }}" data-confirm="Permanently delete your account and all data?" class="row">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input name="password" type="password" placeholder="Confirm with your password" style="max-width:280px" required>
+<button class="btn danger">Delete my account</button></form></div>{% endblock %}

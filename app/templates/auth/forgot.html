@@ -1,0 +1,7 @@
+{% extends 'base.html' %}{% block title %}Forgot password{% endblock %}
+{% block content %}<div class="card auth-box"><h1>Reset password</h1><p class="muted">Enter your email and we'll send a reset link.</p>
+<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="field"><label for="email">Email</label><input id="email" name="email" type="email" placeholder="you@example.com" required></div>
+<button class="btn block">Send reset link</button></form>
+{% if dev_link %}<div class="disclaimer" style="margin-top:1rem"><b>Demo mode</b> (no SMTP server configured) – open this link to reset:<br><a href="{{ dev_link }}">{{ dev_link }}</a></div>{% endif %}
+<p class="small center" style="margin-top:1rem"><a href="{{ url_for('auth.login') }}">Back to login</a></p></div>{% endblock %}
