@@ -32,6 +32,40 @@ def _persistent_secret(filename):
         return fh.read().strip()
 
 
+
+def _configured_secret(env_name, filename):
+    """Read secrets from environment on Vercel; use local files otherwise."""
+    value = os.environ.get(env_name)
+    if value:
+        return value
+
+    if os.environ.get("VERCEL") == "1":
+        raise RuntimeError(
+            f"Missing required Vercel environment variable: {env_name}"
+        )
+
+    return _persistent_secret(filename)
+Ab class Config: ke andar yeh do lines dhoondein:
+
+python
+SECRET_KEY = os.environ.get("SECRET_KEY") or _persistent_secret("secret.key")
+Aur:
+
+python
+DATA_KEY = os.environ.get("DATA_KEY") or _persistent_secret("data.key")
+In dono ko replace karein:
+
+python
+SECRET_KEY = _configured_secret("SECRET_KEY", "secret.key")
+python
+DATA_KEY = _configured_secret("DATA_KEY", "data.key")
+
+
+
+
+
+
+
 class Config:
     BASE_DIR = BASE_DIR
     SECRET_KEY = os.environ.get("SECRET_KEY") or _persistent_secret("secret.key")
